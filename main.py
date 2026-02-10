@@ -37,7 +37,9 @@ def create_app_from_config(config: AppConfig = default_config) -> ScreenMonitorA
     app = ScreenMonitorApp(
         detector=detector,
         capture=capture,
-        fps_limit=config.screen.fps_limit
+        fps_limit=config.screen.fps_limit,
+        enable_mouse_control=config.mouse.enabled,
+        mouse_target_percent=config.mouse.target_percent
     )
 
     default_logger.info("应用实例创建完成")

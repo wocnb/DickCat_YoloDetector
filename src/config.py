@@ -45,10 +45,29 @@ class DetectorConfig:
 
 
 @dataclass
+class MouseConfig:
+    """鼠标控制配置 (｡♥‿♥｡)"""
+    # 是否启用自动移动鼠标
+    enabled: bool = True
+
+    # 鼠标目标位置在检测框上部的百分比（0-1之间）
+    # 例如：0.2 表示上部20%，0.5 表示上半部分的中心
+    target_percent: float = 0.2
+
+    # 鼠标移动的平滑度（0-1之间）
+    # 0.0 = 瞬间移动，1.0 = 非常平滑
+    smoothness: float = 0.3
+
+    # 鼠标移动速度（每次移动的像素数）
+    move_speed: int = 20
+
+
+@dataclass
 class AppConfig:
     """应用主配置"""
     screen: ScreenConfig = field(default_factory=ScreenConfig)
     detector: DetectorConfig = field(default_factory=DetectorConfig)
+    mouse: MouseConfig = field(default_factory=MouseConfig)
 
     # 窗口名称
     window_name: str = "YOLO屏幕监控"

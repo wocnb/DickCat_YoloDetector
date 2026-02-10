@@ -13,6 +13,9 @@ numpy>=1.24.0
 # 透明覆盖窗口（喵的魔法~）
 PyQt5>=5.15.0
 
+# 鼠标控制（自动移动鼠标功能~）
+pyautogui>=0.9.54
+
 # 可选：GPU加速（如果使用NVIDIA GPU）
 # ultralytics[torch]>=8.0.0
 # torch>=2.0.0

@@ -2,6 +2,7 @@
 屏幕监控应用主模块 - 喵为您服务~ 🎀
 整合屏幕捕获和YOLO检测功能，在屏幕上直接绘制检测框
 带智能平滑功能，避免检测框闪烁~
+支持自动鼠标控制功能~
 """
 import cv2
 import time
@@ -13,6 +14,7 @@ from .screen_capture import ScreenCapture
 from .yolo_detector import YOLODetector, DetectionResult
 from .screen_overlay import TransparentOverlay, create_overlay_app
 from .detection_smoother import DetectionSmoother
+from .mouse_controller import MouseController
 from .logger import default_logger
 
 
@@ -27,7 +29,9 @@ class ScreenMonitorApp:
         self,
         detector: YOLODetector,
         capture: Optional[ScreenCapture] = None,
-        fps_limit: int = 30
+        fps_limit: int = 30,
+        enable_mouse_control: bool = False,
+        mouse_target_percent: float = 0.2
     ):
         """
         初始化屏幕监控应用
@@ -36,6 +40,8 @@ class ScreenMonitorApp:
             detector: YOLO检测器实例
             capture: 屏幕捕获器实例，None则创建默认实例
             fps_limit: FPS限制，防止CPU占用过高
+            enable_mouse_control: 是否启用鼠标控制
+            mouse_target_percent: 鼠标目标位置在检测框上部的百分比（0-1）
         """
         self.detector = detector
         self.capture = capture or ScreenCapture()
@@ -48,6 +54,15 @@ class ScreenMonitorApp:
             history_size=5,     # 保留5帧历史
             iou_threshold=0.5   # IOU阈值
         )
+
+        # 创建鼠标控制器（可选功能~）
+        self.mouse_controller: Optional[MouseController] = None
+        if enable_mouse_control:
+            self.mouse_controller = MouseController(
+                target_percent=mouse_target_percent,
+                smoothness=0.3,
+                move_speed=20
+            )
 
         # 性能统计
         self.fps = 0
@@ -63,6 +78,10 @@ class ScreenMonitorApp:
         default_logger.info(f"  - FPS限制: {fps_limit}")
         default_logger.info(f"  - 显示模式: 透明覆盖窗口")
         default_logger.info(f"  - 检测平滑: 已启用")
+        if self.mouse_controller:
+            default_logger.info(f"  - 鼠标控制: 已启用 (上部 {mouse_target_percent * 100:.0f}%)")
+        else:
+            default_logger.info(f"  - 鼠标控制: 未启用")
         default_logger.info("=" * 50)
 
     def run(self):
@@ -132,6 +151,11 @@ class ScreenMonitorApp:
 
         # 更新覆盖窗口上的检测结果
         overlay.update_detections(smoothed_detections)
+
+        # 鼠标控制（如果启用~）
+        if self.mouse_controller:
+            self.mouse_controller.update_target(smoothed_detections)
+            self.mouse_controller.move()
 
         # 更新FPS
         self._update_fps()
